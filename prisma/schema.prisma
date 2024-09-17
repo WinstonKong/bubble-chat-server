@@ -1,0 +1,111 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["omitApi"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URL")
+}
+
+model User {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  username String  @unique
+  nickname String
+  password String
+  bio      String
+  photo    String?
+
+  userType UserType
+
+  friendIDs   String[] @db.ObjectId
+  friends     User[]   @relation("Friend", fields: [friendIDs], references: [id])
+  friendOfIDs String[] @db.ObjectId
+  friendsOf   User[]   @relation("Friend", fields: [friendOfIDs], references: [id])
+
+  channelIDs String[]  @db.ObjectId
+  channels   Channel[] @relation("UserChannel", fields: [channelIDs], references: [id])
+
+  ownChannels     Channel[] @relation("ownChannel")
+  adminChannelIDs String[]  @db.ObjectId
+  adminChannels   Channel[] @relation("adminChannel", fields: [adminChannelIDs], references: [id])
+
+  messages Message[]
+
+  sentFriendRequests     FriendRequest[] @relation("FriendRequestSender")
+  receivedFriendRequests FriendRequest[] @relation("FriendRequestReceiver")
+}
+
+enum UserType {
+  User
+}
+
+model FriendRequest {
+  id         String              @id @default(auto()) @map("_id") @db.ObjectId
+  senderID   String              @db.ObjectId
+  receiverID String              @db.ObjectId
+  sender     User                @relation("FriendRequestSender", fields: [senderID], references: [id])
+  receiver   User                @relation("FriendRequestReceiver", fields: [receiverID], references: [id])
+  status     FriendRequestStatus
+  message    String
+  createdAt  Int
+  finished   Boolean
+
+  @@index([senderID])
+  @@index([receiverID])
+}
+
+enum FriendRequestStatus {
+  Sent
+  Read
+  Accepted
+  Refused
+}
+
+model Channel {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  name        String?
+  channelType ChannelType
+  dmID        String?     @unique
+  photo       String?
+
+  userIDs String[] @db.ObjectId
+  users   User[]   @relation("UserChannel", fields: [userIDs], references: [id])
+
+  ownerID  String?  @db.ObjectId
+  owner    User?    @relation("ownChannel", fields: [ownerID], references: [id])
+  adminIDs String[] @db.ObjectId
+  admins   User[]   @relation("adminChannel", fields: [adminIDs], references: [id])
+
+  messages Message[]
+}
+
+enum ChannelType {
+  DirectMessage
+  Group
+}
+
+model Message {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  messageID Int    @unique(sort: Desc)
+
+  messageType MessageType
+
+  channelID String  @db.ObjectId
+  channel   Channel @relation(fields: [channelID], references: [id])
+
+  userID    String @db.ObjectId
+  user      User   @relation(fields: [userID], references: [id])
+  content   String
+  createdAt Int
+
+  @@index([channelID])
+  @@index([messageID])
+}
+
+enum MessageType {
+  Content
+  ChannelStart
+  JoinChannel
+  AddFriend
+}

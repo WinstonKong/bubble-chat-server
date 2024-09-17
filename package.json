@@ -1,0 +1,33 @@
+{
+  "name": "bubble-chat-server",
+  "version": "0.0.1",
+  "description": "A chat server based on socket.io and Node.js",
+  "keywords": [],
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./build/src/server.js",
+    "build": "rm -rf ./build && tsc",
+    "prisma:gen": "prisma generate",
+    "prisma:push": "prisma db push",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.18.0",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.1.0",
+    "bson": "^6.8.0",
+    "dotenv": "^16.4.5",
+    "nodemon": "^3.1.4",
+    "prisma": "^5.18.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}
